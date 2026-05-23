@@ -1,0 +1,181 @@
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: rgb(39, 38, 38);
+}
+
+.myheading h1 {
+  font-size: 30px;
+  color: rgba(198, 239, 247, 0.993);
+  text-transform: uppercase;
+  font-weight: 100;
+  text-align: center;
+  margin: 20px 0 15px;
+}
+
+.form-container {
+  width: 100%;
+  background-color: rgb(37, 55, 70);
+  padding: 5px 5px;
+  box-sizing: border-box;
+}
+
+form {
+  max-width: 1190px;
+  margin: auto;
+  background: #346161;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Individual section in the form */
+.form-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+/* Wrapper for label + input/select */
+.form-group {
+  flex: 1 1 250px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Styling for form elements */
+input,
+select,
+button {
+  margin: 2px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+input,
+select {
+  width: 230px;
+  box-shadow: 3px 3px 3px rgb(53, 51, 51);
+  transition: 0.3s ease;
+}
+
+input:hover,
+select:hover {
+  background: #ecf0f3;
+  box-shadow: none;
+}
+
+button {
+  background: #1da1f2;
+  color: white;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  width: 144px;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  background: #047fcc;
+  letter-spacing: 2px;
+}
+
+/* Table Styles */
+.tbl-content {
+  max-height: 600px;
+  overflow-x: auto;
+  border: 3px solid #346161;
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #111;
+  color: white;
+}
+
+th, td {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #444;
+}
+
+/* Errors and Spinner */
+.error {
+  color: #ff4444;
+  background: #ffecec;
+  padding: 15px;
+  border-radius: 10px;
+  margin: 15px 0;
+}
+
+.loading {
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #1da1f2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+::-webkit-scrollbar-thumb {
+  background: #1da1f2;
+  border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-group {
+    flex: 1 1 100%;
+    margin-bottom: 15px;
+  }
+
+  .myheading h1 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 10px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group button {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  button {
+    font-size: 14px;
+  }
+}

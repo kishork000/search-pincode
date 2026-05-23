@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pincode Serviceability Panel</title>
+    <style>
+      :root {
+        --primary-color: #2563eb;
+        --secondary-color: #1e40af;
+        --success-color: #16a34a;
+        --danger-color: #dc2626;
+        --background-color: #f8fafc;
+        --card-background: #ffffff;
+        --text-color: #1f2937;
+        --border-color: #e2e8f0;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        line-height: 1.5;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative; /* allow absolute-positioned toggle button */
+      }
+
+      .header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .card {
+        background: var(--card-background);
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .search-section {
+        display: grid;
+        grid-template-columns: 1fr auto auto;
+        gap: 1rem;
+        align-items: end;
+        margin-bottom: 1rem;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .input-group label {
+        font-weight: 500;
+        color: var(--text-color);
+      }
+
+      input,
+      select {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      input:focus,
+      select:focus {
+        border-color: var(--primary-color);
+      }
+
+      .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .tooltip-container {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+      }
+
+      .tooltip-text {
+        visibility: hidden;
+        background-color: #1a1a1a;
+        color: #e0e0e0;
+        text-align: left;
+        border-radius: 6px;
+        padding: 20px;
+        position: absolute;
+        z-index: 9999;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 500px;
+        max-width: 95vw;
+        opacity: 0;
+        transition: opacity 0.3s;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+        border: 2px solid #555;
+        font-size: 0.80rem;
+        line-height: 1;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-family: 'Courier New', monospace;
+        max-height: 75vh;
+        padding: 25px;
+        overflow-y: auto;
+        background: linear-gradient(135deg, #1a1a1a 0%, #222 100%);
+      }
+
+      .tooltip-container:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -10px;
+        border-width: 10px;
+        border-style: solid;
+        border-color: #1a1a1a transparent transparent transparent;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--secondary-color);
+      }
+
+      .btn-secondary {
+        background-color: #64748b;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: #313944;
+      }
+
+      .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+
+      .results-table th,
+      .results-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .results-table th {
+        background-color: var(--card-background);
+        font-weight: 600;
+      }
+
+      .status {
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: inline-block;
+      }
+
+      .status-available {
+        background-color: #dcfce7;
+        color: var(--success-color);
+      }
+
+      .status-unavailable {
+        background-color: #fee2e2;
+        color: var(--danger-color);
+      }
+
+      .loader {
+        width: 100%;
+        height: 4px;
+        background-color: var(--border-color);
+        border-radius: 4px;
+        overflow: hidden;
+        display: none;
+      }
+
+      .loader-bar {
+        height: 100%;
+        width: 0;
+        background-color: var(--primary-color);
+        transition: width 0.3s ease;
+      }
+
+      .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .summary-card {
+        background: var(--card-background);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+      }
+
+      .summary-card h3 {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+      }
+
+      .summary-card p {
+        color: #64748b;
+        font-size: 0.875rem;
+      }
+
+      @media (max-width: 768px) {
+        .search-section {
+          grid-template-columns: 1fr;
+        }
+
+        .btn {
+          width: 100%;
+        }
+      }
+
+      /* Dark theme overrides using body.dark */
+      body.dark {
+        --background-color: #0b1220;
+        --card-background: #071124;
+        --text-color: #e6eef8;
+        --border-color: #1f2937;
+        --primary-color: #60a5fa;
+        --secondary-color: #3b82f6;
+        --success-color: #34d399;
+        --danger-color: #f87171;
+      }
+
+      /* Make inputs/controls inherit theme-aware background and color */
+      body.dark input,
+      body.dark select,
+      body.dark textarea {
+        background: transparent;
+        color: var(--text-color);
+        border-color: var(--border-color);
+      }
+
+      /* Dark mode: make table headers readable (light text on slightly translucent dark header) */
+      body.dark .results-table th {
+        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--text-color);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      }
+
+      /* Dark mode: make placeholder text visible and inputs show a light-ish background when focused for typing */
+      body.dark input::placeholder,
+      body.dark textarea::placeholder {
+        color: rgba(230, 238, 248, 0.6);
+      }
+
+      /* When an input is focused in dark mode give it a subtle light background to aid typing */
+      body.dark input:focus,
+      body.dark select:focus,
+      body.dark textarea:focus {
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-color);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      /* Specifically ensure the single pincode input is easier to type into (slightly brighter on focus) */
+      body.dark #singlePinInput:focus {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-color);
+      }
+
+      /* Improve visibility of secondary buttons in dark mode */
+      body.dark .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: var(--text-color);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Pincode Serviceability Checker</h1>
+        <p>
+          Check delivery availability and get detailed information for any
+          pincode
+        </p>
+        <button
+          id="themeToggleBtn"
+          class="btn btn-secondary"
+          aria-pressed="false"
+          title="Toggle light and dark theme"
+          style="position: absolute; right: 0.5rem; top: 0.6rem"
+        >
+          Dark Mode
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="search-section">
+          <div class="input-group">
+            <label for="courier">Select Courier Company</label>
+            <select id="courier">
+              <option value="shiprocket" selected>Shiprocket</option>
+              <option value="delhivery">Delhivery</option>
+            </select>
+          </div>
+          <div class="input-group">
+            <label for="singlePinInput">Check single pincode</label>
+            <input type="text" id="singlePinInput" placeholder="e.g. 110001" />
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem">
+            <button class="btn btn-primary" id="checkSingleBtn">
+              Check Pincode
+            </button>
+            <!-- <button class="btn btn-secondary" id="downloadBtn">
+              Download Report
+            </button> -->
+          </div>
+        </div>
+        <div class="loader">
+          <div class="loader-bar"></div>
+        </div>
+        <div
+          id="statusMessage"
+          aria-live="polite"
+          style="margin-top: 0.75rem; color: #374151"
+        ></div>
+      </div>
+
+      <div class="summary-cards">
+        <div class="summary-card">
+          <h3 id="totalChecked">0</h3>
+          <p>Total Checked</p>
+        </div>
+        <div class="summary-card">
+          <h3 id="availableCount">0</h3>
+          <p>Available</p>
+        </div>
+        <div class="summary-card">
+          <h3 id="unavailableCount">0</h3>
+          <p>Unavailable</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div
+          class="scan-controls"
+          style="
+            margin-bottom: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+          "
+        >
+          <button class="btn btn-primary" id="scanBatchBtn">Scan Batch</button>
+          <button class="btn btn-primary" id="nextBatchBtn">
+            Scan Next 100
+          </button>
+          <button class="btn btn-secondary" id="autoScanBtn">
+            Start Auto Scan (100)
+          </button>
+          <label
+            for="rowcount"
+            style="
+              font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+            "
+            >Rows per page:
+            <input
+              type="number"
+              id="rowcount"
+              value="100"
+              min="1"
+              style="
+                width: 80px;
+                padding: 0.4rem;
+                border-radius: 4px;
+                border: 1px solid #e2e8f0;
+              "
+            />
+          </label>
+          <label
+            for="pg"
+            style="
+              font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+            "
+            >Page (optional):
+            <input
+              type="number"
+              id="pg"
+              placeholder="leave empty for all"
+              min="0"
+              style="
+                width: 100px;
+                padding: 0.4rem;
+                border-radius: 4px;
+                border: 1px solid #e2e8f0;
+              "
+            />
+          </label>
+          <label
+            for="autoDelay"
+            style="
+              font-size: 0.9rem;
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+            "
+            >Delay (s):
+            <input
+              type="number"
+              id="autoDelay"
+              value="15"
+              min="1"
+              style="
+                width: 80px;
+                padding: 0.4rem;
+                border-radius: 4px;
+                border: 1px solid #e2e8f0;
+              "
+            />
+          </label>
+          <button class="btn btn-secondary" id="pauseAutoBtn" disabled>
+            Pause
+          </button>
+          <div
+            id="batchInfo"
+            style="margin-left: 0.5rem; font-size: 0.9rem; color: #475569"
+          ></div>
+          <button class="btn btn-secondary" id="exportSelectedBtn" disabled>
+            Export Selected (required before delete)
+          </button>
+          <button class="btn btn-secondary" id="deleteSelectedBtn" disabled>
+            Delete Selected
+          </button>
+        </div>
+        <table class="results-table">
+          <thead>
+            <tr>
+              <th>
+                <input
+                  type="checkbox"
+                  id="selectAll"
+                  aria-label="Select all unserviceable pincodes"
+                  title="Select all unserviceable pincodes"
+                />
+              </th>
+              <th>Pincode</th>
+              <th>City</th>
+              <th>State</th>
+              <th>COD Available</th>
+              <th>Delivery Time</th>
+              <th>Reason</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const downloadBtn = document.getElementById("downloadBtn");
+        const scanBatchBtn = document.getElementById("scanBatchBtn");
+        const nextBatchBtn = document.getElementById("nextBatchBtn");
+        const autoScanBtn = document.getElementById("autoScanBtn");
+        const exportSelectedBtn = document.getElementById("exportSelectedBtn");
+        const deleteSelectedBtn = document.getElementById("deleteSelectedBtn");
+        const selectAll = document.getElementById("selectAll");
+        const pauseAutoBtn = document.getElementById("pauseAutoBtn");
+        const autoDelayInput = document.getElementById("autoDelay");
+        const batchInfo = document.getElementById("batchInfo");
+        const checkSingleBtn = document.getElementById("checkSingleBtn");
+        const singlePinInput = document.getElementById("singlePinInput");
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const resultsBody = document.getElementById("resultsBody");
+        const loader = document.querySelector(".loader");
+        const loaderBar = document.querySelector(".loader-bar");
+        const totalChecked = document.getElementById("totalChecked");
+        const availableCount = document.getElementById("availableCount");
+        const unavailableCount = document.getElementById("unavailableCount");
+
+        let available = 0;
+        let unavailable = 0;
+        let lastExportToken = null;
+        // Batch scan state
+        let batchCurrentPg = 0;
+        let batchTotalPages = null;
+        let batchAutoRunning = false;
+        // Global accumulator so manual and auto scans produce the same view
+        let accumulatedUnserviceable = {};
+        let checkedTotal = 0;
+        let lockedCourier = null;
+        let batchPaused = false;
+
+        // Helper: fetch and parse JSON safely. If server returns non-JSON, include body in thrown error.
+        async function fetchJson(url, opts) {
+          const resp = await fetch(url, opts);
+          const text = await resp.text();
+          if (!resp.ok) {
+            // Include status and body to help debugging (e.g. 504 HTML page)
+            throw new Error(
+              "HTTP " + resp.status + " " + resp.statusText + ": " + text
+            );
+          }
+          try {
+            return JSON.parse(text);
+          } catch (err) {
+            // Throw an error containing the raw server response for debugging
+            throw new Error("Invalid JSON response from " + url + ": " + text);
+          }
+        }
+
+        // Helper: show status messages in the UI
+        const statusMessageEl = document.getElementById("statusMessage");
+        function showStatus(msg, type = "info", timeout = 8000) {
+          if (!statusMessageEl) {
+            alert(msg);
+            return;
+          }
+          statusMessageEl.textContent = msg;
+          statusMessageEl.style.color =
+            type === "error"
+              ? "#b91c1c"
+              : type === "success"
+              ? "#15803d"
+              : "#374151";
+          if (timeout > 0) {
+            setTimeout(() => {
+              if (statusMessageEl) statusMessageEl.textContent = "";
+            }, timeout);
+          }
+        }
+
+        // Helper: escape HTML to avoid injecting broken markup
+        function escapeHtml(str) {
+          if (!str && str !== 0) return "";
+          return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+        // Helper: shorten long reason text for table display
+        function shortReason(full, maxLen = 120) {
+          if (!full && full !== 0) return "";
+          const s = String(full);
+          if (s.length <= maxLen) return escapeHtml(s);
+          return escapeHtml(s.slice(0, maxLen - 3)) + "...";
+        }
+
+        // Helper: extract remarks from Delhivery response
+        function extractRemarks(rawData) {
+          if (!rawData) return null;
+          try {
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            
+            // For Delhivery: delivery_codes[0].postal_code.remarks
+            if (parsed && parsed.delivery_codes && Array.isArray(parsed.delivery_codes)) {
+              const postalCode = parsed.delivery_codes[0]?.postal_code;
+              if (postalCode && postalCode.remarks) {
+                return postalCode.remarks;
+              }
+            }
+            
+            // For Shiprocket and other formats: look for remarks in nested structures
+            if (parsed && parsed.remarks) return parsed.remarks;
+            
+            // Recursive search for remarks field
+            const findRemarks = (obj) => {
+              if (!obj || typeof obj !== 'object') return null;
+              if (obj.remarks) return obj.remarks;
+              for (let key in obj) {
+                if (typeof obj[key] === 'object') {
+                  const result = findRemarks(obj[key]);
+                  if (result) return result;
+                }
+              }
+              return null;
+            };
+            
+            return findRemarks(parsed);
+          } catch (e) {
+            return null;
+          }
+        }
+
+        // Helper: extract COD status from API response
+        function extractCodStatus(rawData) {
+          if (!rawData) return null;
+          try {
+            const parsed = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+            
+            // For Delhivery: delivery_codes[0].postal_code.cod
+            if (parsed && parsed.delivery_codes && Array.isArray(parsed.delivery_codes)) {
+              const postalCode = parsed.delivery_codes[0]?.postal_code;
+              if (postalCode && postalCode.cod !== undefined) {
+                // Normalize: Y, y, true, 1 => true; N, n, false, 0 => false
+                const cod = postalCode.cod;
+                if (cod === 'Y' || cod === 'y' || cod === true || cod === 1) return true;
+                if (cod === 'N' || cod === 'n' || cod === false || cod === 0) return false;
+              }
+            }
+            
+            // For other formats: look for cod field
+            const findCod = (obj) => {
+              if (!obj || typeof obj !== 'object') return null;
+              if (obj.cod !== undefined) return obj.cod;
+              if (obj.cod_available !== undefined) return obj.cod_available;
+              for (let key in obj) {
+                if (typeof obj[key] === 'object') {
+                  const result = findCod(obj[key]);
+                  if (result !== null) return result;
+                }
+              }
+              return null;
+            };
+            
+            const codValue = findCod(parsed);
+            if (codValue === null) return null;
+            return codValue === 'Y' || codValue === 'y' || codValue === true || codValue === 1;
+          } catch (e) {
+            return null;
+          }
+        }
+
+        // Helper: format a raw reason (string or JSON) into a short summary and a full display string
+        function formatReason(full) {
+          if (!full && full !== 0) return { short: "", full: "", remarks: null };
+          // Ensure we have a string
+          const raw = typeof full === "string" ? full : JSON.stringify(full);
+          
+          // Extract remarks for display
+          const remarks = extractRemarks(raw);
+          
+          // Try parse JSON for structured responses
+          let parsed = null;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            parsed = null;
+          }
+          let short = "";
+          
+          // If we have remarks, show them as the short version
+          if (remarks) {
+            short = remarks;
+          } else if (parsed) {
+            if (Array.isArray(parsed)) {
+              if (parsed.length === 0) {
+                short = "";
+              } else {
+                const entry = parsed[0];
+                if (entry && typeof entry === "object") {
+                  if (entry.serviceability !== undefined)
+                    short =
+                      "Serviceable: " + (entry.serviceability ? "Yes" : "No");
+                  else if (entry.serviceable !== undefined)
+                    short =
+                      "Serviceable: " + (entry.serviceable ? "Yes" : "No");
+                  else if (entry.status) short = "Status: " + entry.status;
+                  else if (entry.message) short = String(entry.message);
+                  else
+                    short = Object.keys(entry)
+                      .slice(0, 3)
+                      .map((k) => k + ": " + String(entry[k]))
+                      .join(", ");
+                } else {
+                  short = String(parsed[0]);
+                }
+              }
+            } else if (typeof parsed === "object") {
+              if (parsed.message) short = String(parsed.message);
+              else if (parsed.error) short = String(parsed.error);
+              else if (parsed.status) short = "Status: " + parsed.status;
+              else if (parsed.serviceable !== undefined)
+                short = "Serviceable: " + (parsed.serviceable ? "Yes" : "No");
+              else {
+                const keys = Object.keys(parsed);
+                short = keys
+                  .slice(0, 2)
+                  .map((k) => k + ": " + String(parsed[k]))
+                  .join("; ");
+              }
+            } else {
+              short = String(parsed).slice(0, 120);
+            }
+          } else {
+            // Not JSON — make a concise single-line snippet
+            const cleaned = raw.replace(/\s+/g, " ").trim();
+            short = cleaned.split(". ")[0];
+            if (short.length > 120) short = short.slice(0, 117) + "...";
+          }
+          // Final fallback
+          if (!short)
+            short =
+              typeof raw === "string"
+                ? raw.slice(0, 120)
+                : String(raw).slice(0, 120);
+          
+          // Format the full response for tooltip display
+          const formattedFull = formatApiResponseTable(raw);
+          return { short: short, full: formattedFull, remarks: remarks };
+        }
+
+        // Format API response into readable table format based on courier
+        function formatApiResponseTable(rawData) {
+          let html = "";
+          
+          try {
+            const parsed = typeof rawData === "string" ? JSON.parse(rawData) : rawData;
+            
+            // ============================================
+            // DELHIVERY FORMAT
+            // ============================================
+            if (parsed && parsed.delivery_codes && Array.isArray(parsed.delivery_codes)) {
+              const postalCode = parsed.delivery_codes[0]?.postal_code;
+              if (postalCode) {
+                html = "🚚 DELHIVERY - API Response Data\n";
+                html += "════════════════════════════════════════════\n\n";
+                
+                // Location Information
+                html += "📍 Location Information:\n";
+                html += "──────────────────────────────────────────\n";
+                html += `${"Pin Code".padEnd(25)} : ${postalCode.pin || "-"}\n`;
+                html += `${"City".padEnd(25)} : ${postalCode.city || "-"}\n`;
+                html += `${"District".padEnd(25)} : ${postalCode.district || "-"}\n`;
+                html += `${"State".padEnd(25)} : ${postalCode.state || "-"}\n`;
+                html += `${"State Code".padEnd(25)} : ${postalCode.state_code || "-"}\n`;
+                html += "\n";
+                
+                // Delivery Services
+                html += "🎯 Delivery Services:\n";
+                html += "──────────────────────────────────────────\n";
+                const formatYN = (val) => (val === "Y" || val === true) ? "Yes ✓" : (val === "N" || val === false ? "No ✗" : "-");
+                html += `${"COD Available".padEnd(25)} : ${formatYN(postalCode.cod)}\n`;
+                html += `${"Prepaid Available".padEnd(25)} : ${formatYN(postalCode.prepaid)}\n`;
+                html += `${"Pickup Available".padEnd(25)} : ${formatYN(postalCode.pickup)}\n`;
+                html += `${"RTO Available".padEnd(25)} : ${formatYN(postalCode.rto)}\n`;
+                html += `${"Surface Delivery".padEnd(25)} : ${formatYN(postalCode.surface)}\n`;
+                html += "\n";
+                
+                // Status Information
+                html += "⚠️ Status Information:\n";
+                html += "──────────────────────────────────────────\n";
+                html += `${"Remarks".padEnd(25)} : ${postalCode.remarks || "-"}\n`;
+                html += `${"Is Serviceable".padEnd(25)} : ${postalCode.is_serviceable !== undefined ? (postalCode.is_serviceable ? "Yes ✓" : "No ✗") : "-"}\n`;
+                html += "\n";
+                
+                // ALL Additional Data - show everything not in standard fields
+                const standardFields = ["pin", "city", "district", "state", "state_code", "cod", "prepaid", "pickup", "rto", "surface", "remarks", "is_serviceable"];
+                const additionalFields = Object.entries(postalCode).filter(([key]) => !standardFields.includes(key));
+                
+                if (additionalFields.length > 0) {
+                  html += "📊 Additional Data:\n";
+                  html += "──────────────────────────────────────────\n";
+                  additionalFields.forEach(([key, value]) => {
+                    if (value !== null && value !== undefined) {
+                      // Format value properly
+                      let displayValue = value;
+                      if (typeof value === "object") {
+                        displayValue = JSON.stringify(value, null, 2);
+                      } else {
+                        displayValue = String(value);
+                      }
+                      html += `${key.padEnd(25)} : ${displayValue.slice(0, 100)}\n`;
+                    }
+                  });
+                }
+                
+                return html;
+              }
+            }
+            
+            // ============================================
+            // SHIPROCKET FORMAT
+            // ============================================
+            if (parsed && (Array.isArray(parsed) || parsed.status === 200)) {
+              const data = Array.isArray(parsed) ? parsed[0] : parsed.data?.[0];
+              
+              if (data && typeof data === "object") {
+                html = "🚀 SHIPROCKET - API Response Data\n";
+                html += "════════════════════════════════════════════\n\n";
+                
+                // Courier Information
+                html += "📋 Courier Information:\n";
+                html += "──────────────────────────────────────────\n";
+                html += `${"Courier Name".padEnd(25)} : ${data.courier_name || "-"}\n`;
+                html += `${"Courier ID".padEnd(25)} : ${data.courier_id || "-"}\n`;
+                html += `${"Courier Company".padEnd(25)} : ${data.courier_company !== undefined ? data.courier_company : ""}\n`;
+                if (data.available_courier_companies !== undefined) {
+                  let acc = data.available_courier_companies;
+                  if (Array.isArray(acc)) {
+                    html += `${"Available Couriers".padEnd(25)} : ${acc.join(", ")}\n`;
+                  } else {
+                    html += `${"Available Couriers".padEnd(25)} : ${typeof acc === "object" ? JSON.stringify(acc) : String(acc)}\n`;
+                  }
+                }
+                html += "\n";
+                
+                // Serviceability
+                html += "✈️ Serviceability:\n";
+                html += "──────────────────────────────────────────\n";
+                if (data.serviceability !== undefined) {
+                  html += `${"Serviceability".padEnd(25)} : ${data.serviceability ? "Yes ✓" : "No ✗"}\n`;
+                }
+                if (data.serviceable !== undefined) {
+                  html += `${"Serviceable".padEnd(25)} : ${data.serviceable ? "Yes ✓" : "No ✗"}\n`;
+                }
+                html += `${"Status".padEnd(25)} : ${data.status || "-"}\n`;
+                html += `${"Remarks".padEnd(25)} : ${data.remarks || "-"}\n`;
+                if (data.message) html += `${"Message".padEnd(25)} : ${data.message}\n`;
+                html += "\n";
+                
+                // Delivery Options
+                html += "📦 Delivery Options:\n";
+                html += "──────────────────────────────────────────\n";
+                const formatBool = (val) => (val === true || val === "true" || val === "1" || val === 1) ? "Yes ✓" : (val === false || val === "false" || val === "0" || val === 0 ? "No ✗" : "-");
+                html += `${"COD Available".padEnd(25)} : ${formatBool(data.cod || data.cod_available)}\n`;
+                html += `${"Prepaid".padEnd(25)} : ${formatBool(data.prepaid)}\n`;
+                html += `${"Weight Available".padEnd(25)} : ${data.weight_available || "-"}\n`;
+                if (data.delivery_time) html += `${"Delivery Time".padEnd(25)} : ${data.delivery_time}\n`;
+                if (data.working_days) html += `${"Working Days".padEnd(25)} : ${data.working_days}\n`;
+                html += "\n";
+                
+                // Pickup Information
+                if (data.pickup !== undefined || data.pickup_available !== undefined || data.return_pickup !== undefined) {
+                  html += "🏪 Pickup Information:\n";
+                  html += "──────────────────────────────────────────\n";
+                  html += `${"Pickup".padEnd(25)} : ${formatBool(data.pickup || data.pickup_available)}\n`;
+                  if (data.return_pickup !== undefined) html += `${"Return Pickup".padEnd(25)} : ${formatBool(data.return_pickup)}\n`;
+                  html += "\n";
+                }
+                
+                // Rate Information
+                if (data.rate !== undefined || data.rates !== undefined) {
+                  html += "💰 Rate Information:\n";
+                  html += "──────────────────────────────────────────\n";
+                  if (data.rate !== undefined) html += `${"Rate".padEnd(25)} : ${data.rate}\n`;
+                  if (data.rates !== undefined) html += `${"Rates".padEnd(25)} : ${JSON.stringify(data.rates)}\n`;
+                  if (data.available !== undefined) html += `${"Available".padEnd(25)} : ${data.available}\n`;
+                  html += "\n";
+                }
+                
+                // ALL Additional Fields - show everything
+                const standardFields = ["courier_name", "courier_id", "courier_company", "serviceability", "serviceable", "status", "remarks", "message", "cod", "cod_available", "prepaid", "pickup", "pickup_available", "weight_available", "return_pickup", "delivery_time", "working_days", "rate", "rates", "available"];
+                const additionalFields = Object.entries(data).filter(([key]) => !standardFields.includes(key));
+                
+                if (additionalFields.length > 0) {
+                  html += "📊 Additional Data:\n";
+                  html += "──────────────────────────────────────────\n";
+                  additionalFields.forEach(([key, value]) => {
+                    if (value !== null && value !== undefined) {
+                      let displayValue = value;
+                      if (typeof value === "object") {
+                        displayValue = JSON.stringify(value, null, 2);
+                      } else {
+                        displayValue = String(value);
+                      }
+                      html += `${key.padEnd(25)} : ${displayValue.slice(0, 150)}\n`;
+                    }
+                  });
+                }
+                
+                return html;
+              }
+            }
+            
+            // ============================================
+            // GENERIC FORMAT (Fallback)
+            // ============================================
+            if (parsed && typeof parsed === "object") {
+              html = "📊 API Response Data (Generic Format)\n";
+              html += "════════════════════════════════════════════\n\n";
+              
+              const displayKeys = ["status", "message", "error", "courier_name", "serviceability", "serviceable", "remarks", "cod", "cod_available", "pin", "city", "district"];
+              
+              // Add whitelisted keys first
+              displayKeys.forEach(key => {
+                if (key in parsed && parsed[key] !== null && parsed[key] !== undefined) {
+                  html += `${key.padEnd(25)} : ${String(parsed[key])}\n`;
+                }
+              });
+              
+              // Add ALL remaining keys - don't filter
+              const additionalKeys = Object.keys(parsed).filter(k => !displayKeys.includes(k));
+              if (additionalKeys.length > 0) {
+                html += "\n📊 All Data:\n";
+                html += "──────────────────────────────────────────\n";
+                additionalKeys.forEach(key => {
+                  if (parsed[key] !== null && parsed[key] !== undefined) {
+                    let displayValue = parsed[key];
+                    if (typeof displayValue === "object") {
+                      displayValue = JSON.stringify(displayValue, null, 2);
+                    } else {
+                      displayValue = String(displayValue);
+                    }
+                    html += `${key.padEnd(25)} : ${displayValue.slice(0, 150)}\n`;
+                  }
+                });
+              }
+              
+              return html;
+            }
+          } catch (e) {
+            // If parsing fails, return formatted raw text
+            console.error("Error formatting API response:", e);
+          }
+          
+          // Fallback: return raw with formatting
+          return typeof rawData === "string" ? rawData.slice(0, 300) : JSON.stringify(rawData, null, 2).slice(0, 300);
+        }
+
+        // Theme toggle: persist theme in localStorage and apply body.dark class
+        function applyTheme(theme) {
+          if (!themeToggleBtn) return;
+          if (theme === "dark") {
+            document.body.classList.add("dark");
+            themeToggleBtn.textContent = "Light Mode";
+            themeToggleBtn.setAttribute("aria-pressed", "true");
+          } else {
+            document.body.classList.remove("dark");
+            themeToggleBtn.textContent = "Dark Mode";
+            themeToggleBtn.setAttribute("aria-pressed", "false");
+          }
+          try {
+            localStorage.setItem("theme", theme);
+          } catch (e) {
+            // ignore storage errors
+          }
+        }
+
+        // Initialize theme from localStorage or prefers-color-scheme
+        (function initTheme() {
+          if (!themeToggleBtn) return;
+          let saved = null;
+          try {
+            saved = localStorage.getItem("theme");
+          } catch (e) {
+            saved = null;
+          }
+          if (!saved) {
+            if (
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches
+            )
+              saved = "dark";
+            else saved = "light";
+          }
+          applyTheme(saved);
+          themeToggleBtn.addEventListener("click", function () {
+            const cur = document.body.classList.contains("dark")
+              ? "dark"
+              : "light";
+            applyTheme(cur === "dark" ? "light" : "dark");
+          });
+        })();
+
+        // (Removed "Check All Pincodes" button and handler per request.)
+
+        // Single pincode check — uses same endpoint but for one pin
+        checkSingleBtn.addEventListener("click", async function () {
+          const pinVal =
+            singlePinInput && singlePinInput.value
+              ? singlePinInput.value.trim()
+              : "";
+          if (!/^[0-9]{6}$/.test(pinVal)) {
+            showStatus("Enter a valid 6-digit pincode", "error");
+            return;
+          }
+          // Show loader
+          loader.style.display = "block";
+          loaderBar.style.width = "30%";
+          resultsBody.innerHTML = "";
+          lastExportToken = null;
+          exportSelectedBtn.disabled = true;
+          deleteSelectedBtn.disabled = true;
+          try {
+            const courier =
+              typeof lockedCourier !== "undefined" && lockedCourier
+                ? lockedCourier
+                : document.getElementById("courier").value;
+            const data = await fetchJson(
+              `pincode-serviciblity.php?pincode=${encodeURIComponent(
+                pinVal
+              )}&courier=${encodeURIComponent(courier)}`
+            );
+            if (data.error) {
+              showStatus("Error: " + data.error, "error");
+              return;
+            }
+
+            // Render single-row result
+            const reasonRaw =
+              data.service_error || (data.raw ? JSON.stringify(data.raw) : "");
+            const reason = formatReason(reasonRaw);
+            
+            // Check if pincode is available
+            let isAvail =
+              data.is_available === "1" ||
+              data.is_available === 1 ||
+              data.is_available === true;
+            
+            // If remarks indicate Embargo, mark as not serviceable
+            if (isAvail && reason.remarks && reason.remarks.toLowerCase() === "embargo") {
+              isAvail = false;
+            }
+            
+            // Extract COD status from raw response and override if available
+            const codFromApi = extractCodStatus(reasonRaw);
+            const codDisplay = codFromApi !== null ? (codFromApi ? "Yes" : "No") : (data.cod === "1" ? "Yes" : "No");
+            
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                        <td><input type="checkbox" class="pinCheckbox" data-pin="${escapeHtml(
+                          data.pincode
+                        )}"></td>
+                        <td>${escapeHtml(data.pincode)}</td>
+                        <td>${escapeHtml(data.city_name || "")}</td>
+                        <td>${escapeHtml(data.state_name || "")}</td>
+                        <td>${codDisplay}</td>
+                        <td>${escapeHtml(data.delivery_time || "")}</td>
+                        <td><div class="tooltip-container">${escapeHtml(reason.short)}<span class="tooltip-text">${escapeHtml(reason.full)}</span></div></td>
+                        <td><span class="status ${
+                          isAvail ? "status-available" : "status-unavailable"
+                        }">${
+              isAvail ? "Serviceable" : "Not Serviceable"
+            }</span></td>
+                    `;
+            resultsBody.appendChild(row);
+            totalChecked.textContent = "1";
+            availableCount.textContent = isAvail ? "1" : "0";
+            unavailableCount.textContent = isAvail ? "0" : "1";
+            document
+              .querySelectorAll(".pinCheckbox")
+              .forEach((cb) =>
+                cb.addEventListener("change", updateSelectionState)
+              );
+          } catch (error) {
+            if (error.message && error.message.indexOf("HTTP 504") !== -1) {
+              showStatus(
+                "Check timed out (504). Try again or reduce load.",
+                "error",
+                15000
+              );
+            } else {
+              showStatus(
+                "Error checking pincode: " + error.message,
+                "error",
+                15000
+              );
+            }
+          } finally {
+            loaderBar.style.width = "100%";
+            setTimeout(() => {
+              loader.style.display = "none";
+              loaderBar.style.width = "0";
+            }, 400);
+          }
+        });
+
+        // Download report (button may be commented out in the markup). Guard to avoid breaking script.
+        if (downloadBtn) {
+          downloadBtn.addEventListener("click", function () {
+            window.location.href = "pincode-serviciblity.php?download=1";
+          });
+        }
+
+        // Scan batch (single-page manual scan). Each click fetches exactly one page.
+        scanBatchBtn.addEventListener("click", async function () {
+          // Use lockedCourier if set (auto-scan lock), otherwise use dropdown
+          const courier =
+            typeof lockedCourier !== "undefined" && lockedCourier
+              ? lockedCourier
+              : document.getElementById("courier").value;
+          const rowcount =
+            parseInt(document.getElementById("rowcount").value, 10) || 100;
+          const pgInput = document.getElementById("pg").value;
+
+          // reset UI and accumulator for a fresh manual run
+          resultsBody.innerHTML = "";
+          totalChecked.textContent = "0";
+          availableCount.textContent = "0";
+          unavailableCount.textContent = "0";
+          accumulatedUnserviceable = {};
+          checkedTotal = 0;
+          lastExportToken = null;
+          exportSelectedBtn.disabled = true;
+          deleteSelectedBtn.disabled = true;
+
+          loader.style.display = "block";
+          loaderBar.style.width = "0%";
+
+          try {
+            // If user supplied a specific page, fetch only that page
+            if (pgInput !== null && pgInput !== undefined && pgInput !== "") {
+              const pg = Math.max(0, parseInt(pgInput, 10));
+              const data = await fetchJson(
+                `pincode-serviciblity.php?scan=1&courier=${encodeURIComponent(
+                  courier
+                )}&pg=${pg}&rowcount=${rowcount}`
+              );
+              if (data.error) {
+                showStatus("Scan error: " + data.error, "error", 10000);
+                return;
+              }
+
+              const f = data.fResult || {};
+              for (const pin in f) accumulatedUnserviceable[pin] = f[pin];
+              const pageTotal =
+                data.summary && data.summary.total
+                  ? parseInt(data.summary.total, 10)
+                  : Object.keys(data.tResult || {}).length;
+              checkedTotal += pageTotal;
+
+              // render accumulated results (single page)
+              resultsBody.innerHTML = "";
+              let cnt = 0;
+              for (const pin in accumulatedUnserviceable) {
+                const rd = accumulatedUnserviceable[pin];
+                const reasonRaw =
+                  rd.service_error || (rd.raw ? JSON.stringify(rd.raw) : "");
+                const reason = formatReason(reasonRaw);
+                
+                // Extract COD status from raw response
+                const codFromApi = extractCodStatus(reasonRaw);
+                const codDisplay = codFromApi !== null ? (codFromApi ? "Yes" : "No") : (rd.cod === "1" ? "Yes" : "No");
+                
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                                <td><input type="checkbox" class="pinCheckbox" data-pin="${escapeHtml(
+                                  pin
+                                )}"></td>
+                                <td>${escapeHtml(pin)}</td>
+                                <td>${escapeHtml(rd.city_name || "")}</td>
+                                <td>${escapeHtml(rd.state_name || "")}</td>
+                                <td>${codDisplay}</td>
+                                <td>${escapeHtml(rd.delivery_time || "")}</td>
+                                <td title="${escapeHtml(
+                                  reason.full
+                                )}">${escapeHtml(reason.short)}</td>
+                                <td><span class="status status-unavailable">Not Serviceable</span></td>
+                            `;
+                resultsBody.appendChild(row);
+                cnt++;
+              }
+
+              totalChecked.textContent = checkedTotal;
+              unavailableCount.textContent = Object.keys(
+                accumulatedUnserviceable
+              ).length;
+              availableCount.textContent = Math.max(
+                0,
+                checkedTotal - Object.keys(accumulatedUnserviceable).length
+              );
+              document
+                .querySelectorAll(".pinCheckbox")
+                .forEach((cb) =>
+                  cb.addEventListener("change", updateSelectionState)
+                );
+              batchInfo.textContent = `Page ${pg} — checked ${pageTotal} — unserviceable ${cnt}`;
+              return;
+            }
+
+            // No page provided: perform a single page fetch using the runNextBatch machinery
+            // Reset batch paging so runNextBatch starts from the first page
+            batchTotalPages = null;
+            batchCurrentPg = 0;
+            const r = await runNextBatch();
+            if (r && r.ok) {
+              const now = new Date().toLocaleString();
+              batchInfo.textContent = `Page ${r.pg} @ ${now} — checked ${r.pageTotal} — unserviceable ${r.found}`;
+            }
+          } catch (err) {
+            if (err.message && err.message.indexOf("HTTP 504") !== -1) {
+              showStatus(
+                "Scan timed out (504). Try a smaller Rows-per-page value or scan a single page using the Page input.",
+                "error",
+                15000
+              );
+            } else {
+              showStatus("Scan failed: " + err.message, "error", 15000);
+            }
+          } finally {
+            setTimeout(() => {
+              loader.style.display = "none";
+              loaderBar.style.width = "0";
+            }, 400);
+          }
+        });
+
+        // Core next-batch function: performs one page fetch and renders results.
+        // Returns an object { ok: true, found: number } or throws on fatal error.
+        async function runNextBatch() {
+          const courier =
+            lockedCourier || document.getElementById("courier").value;
+          const rowcount =
+            parseInt(document.getElementById("rowcount").value, 10) || 100;
+          loader.style.display = "block";
+          loaderBar.style.width = "0%";
+          try {
+            // Determine total pages if unknown
+            if (batchTotalPages === null) {
+              const countJson = await fetchJson(
+                `pincode-serviciblity.php?scan=1&courier=${encodeURIComponent(
+                  courier
+                )}&count=1`
+              );
+              if (countJson.error) {
+                showStatus("Count error: " + countJson.error, "error");
+                return { ok: false };
+              }
+              const total = parseInt(countJson.count, 10) || 0;
+              batchTotalPages = Math.max(1, Math.ceil(total / rowcount));
+              batchCurrentPg = 0;
+            }
+
+            if (batchCurrentPg >= batchTotalPages) {
+              showStatus("All batches completed.", "info");
+              return { ok: true, found: 0, completed: true };
+            }
+
+            const pg = batchCurrentPg;
+            const data = await fetchJson(
+              `pincode-serviciblity.php?scan=1&courier=${encodeURIComponent(
+                courier
+              )}&pg=${pg}&rowcount=${rowcount}`
+            );
+            if (data.error) {
+              showStatus("Scan error: " + data.error, "error");
+              return { ok: false };
+            }
+
+            const f = data.fResult || {};
+            // merge page results into the global accumulator
+            for (const pin in f) {
+              accumulatedUnserviceable[pin] = f[pin];
+            }
+            // Determine pageTotal from summary or tResult length
+            const pageTotal =
+              data.summary && data.summary.total
+                ? parseInt(data.summary.total, 10)
+                : Object.keys(data.tResult || {}).length;
+            checkedTotal += pageTotal;
+
+            // render accumulated/deduped results (replace current table)
+            resultsBody.innerHTML = "";
+            let cnt = 0;
+            for (const pin in accumulatedUnserviceable) {
+              const row = document.createElement("tr");
+              const rd = accumulatedUnserviceable[pin];
+              const reasonRaw =
+                rd.service_error || (rd.raw ? JSON.stringify(rd.raw) : "");
+              const reason = formatReason(reasonRaw);
+              
+              // Extract COD status from raw response
+              const codFromApi = extractCodStatus(reasonRaw);
+              const codDisplay = codFromApi !== null ? (codFromApi ? "Yes" : "No") : (rd.cod === "1" ? "Yes" : "No");
+              
+              row.innerHTML = `
+                            <td><input type="checkbox" class="pinCheckbox" data-pin="${escapeHtml(
+                              pin
+                            )}"></td>
+                            <td>${escapeHtml(pin)}</td>
+                            <td>${escapeHtml(rd.city_name || "")}</td>
+                            <td>${escapeHtml(rd.state_name || "")}</td>
+                            <td>${codDisplay}</td>
+                            <td>${escapeHtml(rd.delivery_time || "")}</td>
+                            <td><div class="tooltip-container">${escapeHtml(reason.short)}<span class="tooltip-text">${escapeHtml(reason.full)}</span></div></td>
+                            <td><span class="status status-unavailable">Not Serviceable</span></td>
+                        `;
+              resultsBody.appendChild(row);
+              cnt++;
+            }
+
+            // update counters to reflect accumulated state
+            totalChecked.textContent = checkedTotal;
+            unavailableCount.textContent = Object.keys(
+              accumulatedUnserviceable
+            ).length;
+            availableCount.textContent = Math.max(
+              0,
+              checkedTotal - Object.keys(accumulatedUnserviceable).length
+            );
+
+            if (cnt === 0)
+              showStatus(
+                "No unserviceable pincodes found in batch " + pg + ".",
+                "success"
+              );
+            batchCurrentPg++;
+            const percent = Math.round(
+              (batchCurrentPg / batchTotalPages) * 100
+            );
+            loaderBar.style.width = percent + "%";
+            document
+              .querySelectorAll(".pinCheckbox")
+              .forEach((cb) =>
+                cb.addEventListener("change", updateSelectionState)
+              );
+
+            return { ok: true, found: cnt, pageTotal: pageTotal, pg: pg };
+          } catch (err) {
+            if (err.message && err.message.indexOf("HTTP 504") !== -1) {
+              showStatus(
+                "Batch scan timed out (504). Reduce Rows-per-page or retry this batch.",
+                "error"
+              );
+            } else {
+              showStatus("Batch scan failed: " + err.message, "error");
+            }
+            return { ok: false };
+          } finally {
+            setTimeout(() => {
+              loader.style.display = "none";
+              loaderBar.style.width = "0";
+            }, 300);
+          }
+        }
+
+        // Scan next batch (one page) — uses/updates batchCurrentPg
+        nextBatchBtn.addEventListener("click", async function () {
+          const r = await runNextBatch();
+          if (r && r.ok) {
+            const now = new Date().toLocaleString();
+            batchInfo.textContent = `Page ${r.pg} @ ${now} — checked ${r.pageTotal} — unserviceable ${r.found}`;
+          }
+        });
+
+        // Auto-scan batches sequentially until done or stopped
+        autoScanBtn.addEventListener("click", async function () {
+          if (batchAutoRunning) {
+            batchAutoRunning = false;
+            autoScanBtn.textContent = "Start Auto Scan (100)";
+            showStatus("Auto scan stopped by user.", "info");
+            return;
+          }
+          batchAutoRunning = true;
+          autoScanBtn.textContent = "Stop Auto Scan";
+          // Lock courier at start
+          lockedCourier = document.getElementById("courier").value;
+          document.getElementById("courier").disabled = true;
+          pauseAutoBtn.disabled = false;
+          // Disable manual scan controls while auto-scan runs to avoid conflicts
+          scanBatchBtn.disabled = true;
+          nextBatchBtn.disabled = true;
+          batchPaused = false;
+          pauseAutoBtn.textContent = "Pause";
+          showStatus(
+            "Auto scan started. Scanning batches of " +
+              (parseInt(document.getElementById("rowcount").value, 10) || 100) +
+              " using " +
+              lockedCourier +
+              ".",
+            "info",
+            5000
+          );
+          try {
+            // determine total pages
+            const courier = lockedCourier;
+            const rowcount =
+              parseInt(document.getElementById("rowcount").value, 10) || 100;
+            const countJson = await fetchJson(
+              `pincode-serviciblity.php?scan=1&courier=${encodeURIComponent(
+                courier
+              )}&count=1`
+            );
+            if (countJson.error) {
+              showStatus("Count error: " + countJson.error, "error");
+              batchAutoRunning = false;
+              autoScanBtn.textContent = "Start Auto Scan (100)";
+              return;
+            }
+            const total = parseInt(countJson.count, 10) || 0;
+            batchTotalPages = Math.max(1, Math.ceil(total / rowcount));
+            batchCurrentPg = 0;
+
+            while (batchAutoRunning && batchCurrentPg < batchTotalPages) {
+              await new Promise((res) => setTimeout(res, 200)); // small throttle
+              const r = await runNextBatch();
+              if (!r || !r.ok) {
+                // stop on error
+                batchAutoRunning = false;
+                break;
+              }
+              if (r.completed) break;
+              // update per-batch info
+              const now = new Date().toLocaleString();
+              batchInfo.textContent = `Page ${r.pg} @ ${now} — checked ${r.pageTotal} — unserviceable ${r.found}`;
+              // Allow pause: wait while paused
+              while (batchPaused && batchAutoRunning) {
+                await new Promise((res) => setTimeout(res, 500));
+              }
+              // Wait configured seconds between batches to be gentle on courier APIs
+              const delaySec = parseInt(autoDelayInput.value, 10) || 15;
+              await new Promise((res) => setTimeout(res, delaySec * 1000));
+            }
+            if (batchAutoRunning) showStatus("Auto scan completed.", "success");
+          } catch (err) {
+            showStatus("Auto scan error: " + err.message, "error");
+          } finally {
+            batchAutoRunning = false;
+            autoScanBtn.textContent = "Start Auto Scan (100)";
+            // unlock courier and reset pause
+            lockedCourier = null;
+            document.getElementById("courier").disabled = false;
+            batchPaused = false;
+            pauseAutoBtn.disabled = true;
+            pauseAutoBtn.textContent = "Pause";
+            // Re-enable manual scan controls
+            scanBatchBtn.disabled = false;
+            nextBatchBtn.disabled = false;
+          }
+        });
+
+        // Select all handling
+        selectAll.addEventListener("change", function () {
+          const checked = this.checked;
+          document.querySelectorAll(".pinCheckbox").forEach((cb) => {
+            cb.checked = checked;
+          });
+          updateSelectionState();
+        });
+
+        // Pause / Resume auto scan
+        pauseAutoBtn.addEventListener("click", function () {
+          if (!batchAutoRunning) {
+            showStatus("Auto scan is not running.", "info", 3000);
+            return;
+          }
+          batchPaused = !batchPaused;
+          pauseAutoBtn.textContent = batchPaused ? "Resume" : "Pause";
+          showStatus(
+            batchPaused ? "Auto scan paused." : "Auto scan resumed.",
+            "info",
+            3000
+          );
+        });
+
+        function updateSelectionState() {
+          const any = Array.from(
+            document.querySelectorAll(".pinCheckbox")
+          ).some((cb) => cb.checked);
+          exportSelectedBtn.disabled = !any;
+        }
+
+        // Export selected: must be called before delete
+        exportSelectedBtn.addEventListener("click", async function () {
+          const selected = Array.from(document.querySelectorAll(".pinCheckbox"))
+            .filter((cb) => cb.checked)
+            .map((cb) => cb.dataset.pin);
+          if (selected.length === 0) {
+            showStatus("Select at least one pincode", "error");
+            return;
+          }
+          const courier = document.getElementById("courier").value;
+          exportSelectedBtn.disabled = true;
+          try {
+            const url = `pincode-serviciblity.php?export=1&courier=${encodeURIComponent(
+              courier
+            )}&pins=${selected.join(",")}`;
+            const json = await fetchJson(url);
+            if (json.error) {
+              showStatus("Export error: " + json.error, "error");
+              exportSelectedBtn.disabled = false;
+              return;
+            }
+            lastExportToken = json.token;
+            // trigger download
+            window.location.href = json.download_url;
+            // enable delete after a short delay (assume user downloaded)
+            setTimeout(() => {
+              deleteSelectedBtn.disabled = false;
+            }, 500);
+          } catch (err) {
+            if (err.message && err.message.indexOf("HTTP 504") !== -1) {
+              showStatus(
+                "Export timed out (504). Try a smaller selection or increase server timeout.",
+                "error",
+                15000
+              );
+            } else {
+              showStatus("Export failed: " + err.message, "error", 10000);
+            }
+            exportSelectedBtn.disabled = false;
+          }
+        });
+
+        // Delete selected: requires lastExportToken
+        deleteSelectedBtn.addEventListener("click", async function () {
+          if (!lastExportToken) {
+            showStatus(
+              "You must export (download) CSV before deleting.",
+              "error"
+            );
+            return;
+          }
+          const selected = Array.from(document.querySelectorAll(".pinCheckbox"))
+            .filter((cb) => cb.checked)
+            .map((cb) => cb.dataset.pin);
+          if (selected.length === 0) {
+            showStatus("Select at least one pincode", "error");
+            return;
+          }
+          if (
+            !confirm(
+              "Delete " + selected.length + " pincodes? This is permanent."
+            )
+          )
+            return;
+          try {
+            const json = await fetchJson(
+              "pincode-serviciblity.php?action=delete",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  token: lastExportToken,
+                  pins: selected,
+                }),
+              }
+            );
+            if (json.error) {
+              showStatus("Delete error: " + json.error, "error");
+              return;
+            }
+            showStatus(
+              "Deleted: " + (json.deleted || []).join(", "),
+              "success",
+              8000
+            );
+            // remove deleted rows from UI
+            selected.forEach((pin) => {
+              const cb = document.querySelector(
+                '.pinCheckbox[data-pin="' + pin + '"]'
+              );
+              if (cb) cb.closest("tr").remove();
+            });
+            // reset token and disable delete
+            lastExportToken = null;
+            deleteSelectedBtn.disabled = true;
+          } catch (err) {
+            if (err.message && err.message.indexOf("HTTP 504") !== -1) {
+              showStatus(
+                "Delete timed out (504). Try again or delete smaller batches.",
+                "error",
+                15000
+              );
+            } else {
+              showStatus("Delete failed: " + err.message, "error", 10000);
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
